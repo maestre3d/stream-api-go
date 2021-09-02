@@ -24,7 +24,6 @@ type OrderStreamsWs struct {
 var _ WebSocket = &OrderStreamsWs{}
 
 func NewOrderStreamsWs(b *gluon.Bus) *OrderStreamsWs {
-
 	return &OrderStreamsWs{
 		bus:       b,
 		orderChan: make(chan event.OrderUpdated),
@@ -36,7 +35,6 @@ func (o *OrderStreamsWs) MapStreams(r *mux.Router) {
 		o.orderChan <- msg.Data.(event.OrderUpdated)
 		return nil
 	})
-
 	r.Path("/streams/orders/{id}").Methods(http.MethodGet).HandlerFunc(o.listenToUpdates)
 }
 
@@ -57,10 +55,12 @@ func (o *OrderStreamsWs) listenToUpdates(w http.ResponseWriter, r *http.Request)
 	for {
 		select {
 		case order := <-o.orderChan:
-			err = c.WriteJSON(order)
-			if err != nil {
-				log.Println("err:", err)
-				break
+			if order.ID == mux.Vars(r)["id"] {
+				err = c.WriteJSON(order)
+				if err != nil {
+					log.Println("err:", err)
+					break
+				}
 			}
 		}
 	}

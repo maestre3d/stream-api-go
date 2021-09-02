@@ -17,7 +17,7 @@ func main() {
 	r := mux.NewRouter()
 	b := initBus()
 	initRoutes(r, b)
-	ws := startStreamAPI(r, b)
+	ws := initStreamAPI(r, b)
 	defer ws.Close()
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -39,7 +39,7 @@ func initRoutes(r *mux.Router, b *gluon.Bus) {
 	orderCtrl.MapRoutes(r)
 }
 
-func startStreamAPI(r *mux.Router, b *gluon.Bus) *controller.OrderStreamsWs {
+func initStreamAPI(r *mux.Router, b *gluon.Bus) *controller.OrderStreamsWs {
 	orderStreams := controller.NewOrderStreamsWs(b)
 	orderStreams.MapStreams(r)
 	return orderStreams
